@@ -1,5 +1,4 @@
-import streamlit as st
-import sqlite3
+﻿import streamlit as st
 import pandas as pd
 import io
 import ast
@@ -31,12 +30,11 @@ from business.sales_forecasting import SalesForecaster
 
 st.set_page_config(
     page_title="VOXINTEL",
-    page_icon="🎙️",
+    page_icon="Ã°Å¸Å½â„¢Ã¯Â¸Â",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-DB_PATH = "voxintel.db"
 
 
 # ============================================================
@@ -109,25 +107,16 @@ div[data-testid="stExpander"] {
 # DATABASE
 # ============================================================
 
-def load_conversations():
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        query = """
-        SELECT id, timestamp, transcript, language, speaker, events
-        FROM conversations
-        ORDER BY id DESC
-        """
-        df = pd.read_sql_query(query, conn)
-        conn.close()
-        return df
-    except Exception as e:
-        st.error(f"Database error: {e}")
-        return pd.DataFrame(
-            columns=[
-                "id", "timestamp", "transcript",
-                "language", "speaker", "events"
-            ]
-        )
+def load_conversations(database):
+    columns = [
+        "id", "timestamp", "transcript", "language", "speaker",
+        "events", "sentiment", "polarity", "subjectivity",
+        "confidence", "reviewed_sentiment", "review_notes",
+        "reviewed_at"
+    ]
+
+    rows = database.get_all_conversations()
+    return pd.DataFrame(rows, columns=columns)
 
 
 def parse_events(value):
@@ -156,11 +145,116 @@ def event_counts(df):
     return counter
 
 
+def display_event_cards(events):
+    """Display polished event cards while filtering duplicate details."""
+
+    if not events:
+        st.info("No events detected.")
+        return
+
+    event_styles = {
+        "Meeting": ("MEETING", "??", "#2563EB"),
+        "Reminder": ("REMINDER", "??", "#D97706"),
+        "Call": ("CALL", "??", "#059669"),
+        "Task": ("TASK", "??", "#7C3AED"),
+        "Question": ("QUESTION", "?", "#0891B2"),
+        "Time": ("TIME", "??", "#64748B"),
+        "Date": ("DATE", "??", "#64748B"),
+        "Location": ("LOCATION", "??", "#64748B"),
+        "Phone": ("PHONE", "??", "#64748B"),
+        "Amount": ("AMOUNT", "??", "#64748B"),
+    }
+
+    field_labels = [
+        ("date", "Date"),
+        ("time", "Time"),
+        ("location", "Location"),
+        ("action", "Action"),
+        ("person", "Person"),
+        ("value", "Value"),
+    ]
+
+    meeting_details = set()
+
+    for event in events:
+        if not isinstance(event, dict):
+            continue
+
+        if str(event.get("type", "")).lower() == "meeting":
+            for key in ("date", "time", "location"):
+                value = event.get(key)
+                if value not in (None, ""):
+                    normalized = " ".join(str(value).lower().split())
+                    meeting_details.add((key, normalized))
+
+    for event in events:
+        if not isinstance(event, dict):
+            continue
+
+        event_type = str(event.get("type", "Event"))
+
+        if event_type in ("Date", "Time", "Location"):
+            value = event.get("value")
+            key = event_type.lower()
+
+            if value not in (None, ""):
+                normalized = " ".join(str(value).lower().split())
+                if (key, normalized) in meeting_details:
+                    continue
+
+        title, icon, accent = event_styles.get(
+            event_type,
+            (event_type.upper(), "?", "#64748B")
+        )
+
+        details = [
+            (label, event[key])
+            for key, label in field_labels
+            if event.get(key) not in (None, "")
+        ]
+
+        with st.container(border=True):
+            st.markdown(
+                f"""
+                <div style="
+                    border-left: 5px solid {accent};
+                    padding: 3px 0 3px 12px;
+                    margin-bottom: 12px;
+                ">
+                    <div style="
+                        color: {accent};
+                        font-size: 13px;
+                        font-weight: 800;
+                        letter-spacing: 1.2px;
+                    ">{icon} {title}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            if details:
+                columns = st.columns(min(len(details), 3))
+
+                for index, (label, value) in enumerate(details):
+                    with columns[index % len(columns)]:
+                        st.caption(label.upper())
+                        st.markdown(f"**{value}**")
+
+            elif event.get("text"):
+                st.write(str(event["text"]))
+
+
 # ============================================================
 # INITIALIZE COMPONENTS
 # ============================================================
 
-df = load_conversations()
+database = ConversationDatabase()
+
+try:
+    df = load_conversations(database)
+except Exception as e:
+    st.error(f"Supabase database connection failed: {e}")
+    st.stop()
 
 analytics = ConversationAnalytics()
 graph = KnowledgeGraph()
@@ -168,7 +262,6 @@ speaker_detector = SpeakerDetector()
 language_detector = LanguageDetector()
 event_extractor = EventExtractor()
 memory = ConversationMemory()
-database = ConversationDatabase()
 
 
 # ============================================================
@@ -176,7 +269,7 @@ database = ConversationDatabase()
 # ============================================================
 
 st.markdown(
-    '<div class="main-title">🎙️ VOXINTEL</div>',
+    '<div class="main-title">Ã°Å¸Å½â„¢Ã¯Â¸Â VOXINTEL</div>',
     unsafe_allow_html=True
 )
 
@@ -192,31 +285,31 @@ st.markdown(
 # SIDEBAR
 # ============================================================
 
-st.sidebar.title("🎙️ VOXINTEL")
+st.sidebar.title("Ã°Å¸Å½â„¢Ã¯Â¸Â VOXINTEL")
 st.sidebar.markdown("### AI + Data Science Platform")
 st.sidebar.markdown("---")
 
 page = st.sidebar.radio(
     "Navigation",
     [
-        "📊 Dashboard",
-        "🎙️ Speech-to-Text",
-        "🧠 Conversation Intelligence",
-        "😊 Sentiment & NLP",
-        "👥 Customer Segmentation",
-        "🚨 Fraud Detection",
-        "📈 Sales Forecasting",
-        "📊 Business Analytics",
-        "🔬 EDA & Statistics",
-        "🤖 Machine Learning",
-        "🕸️ Knowledge Graph",
-        "💾 Conversation Database",
-        "📈 Analytics"
+        "Ã°Å¸â€œÅ  Dashboard",
+        "Ã°Å¸Å½â„¢Ã¯Â¸Â Speech-to-Text",
+        "Ã°Å¸Â§Â  Conversation Intelligence",
+        "Ã°Å¸ËœÅ  Sentiment & NLP",
+        "Ã°Å¸â€˜Â¥ Customer Segmentation",
+        "Ã°Å¸Å¡Â¨ Fraud Detection",
+        "Ã°Å¸â€œË† Sales Forecasting",
+        "Ã°Å¸â€œÅ  Business Analytics",
+        "Ã°Å¸â€Â¬ EDA & Statistics",
+        "Ã°Å¸Â¤â€“ Machine Learning",
+        "Ã°Å¸â€¢Â¸Ã¯Â¸Â Knowledge Graph",
+        "Ã°Å¸â€™Â¾ Conversation Database",
+        "Ã°Å¸â€œË† Analytics"
     ]
 )
 
 st.sidebar.markdown("---")
-st.sidebar.success("🟢 System Online")
+st.sidebar.success("Ã°Å¸Å¸Â¢ System Online")
 st.sidebar.metric("Conversations", len(df))
 
 total_words_sidebar = (
@@ -227,7 +320,7 @@ st.sidebar.metric("Total Words", total_words_sidebar)
 
 st.sidebar.markdown("---")
 st.sidebar.caption(
-    "Speech → NLP → Intelligence → Data Science → Business Insights"
+    "Speech Ã¢â€ â€™ NLP Ã¢â€ â€™ Intelligence Ã¢â€ â€™ Data Science Ã¢â€ â€™ Business Insights"
 )
 
 
@@ -235,9 +328,9 @@ st.sidebar.caption(
 # DASHBOARD
 # ============================================================
 
-if page == "📊 Dashboard":
+if page == "Ã°Å¸â€œÅ  Dashboard":
 
-    st.header("📊 VOXINTEL Dashboard")
+    st.header("Ã°Å¸â€œÅ  VOXINTEL Dashboard")
 
     total_conversations = len(df)
 
@@ -261,16 +354,16 @@ if page == "📊 Dashboard":
         total_events = 0
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("💬 Conversations", total_conversations)
-    col2.metric("📝 Total Words", total_words)
-    col3.metric("👤 Speakers", total_speakers)
-    col4.metric("🌐 Languages", total_languages)
+    col1.metric("Ã°Å¸â€™Â¬ Conversations", total_conversations)
+    col2.metric("Ã°Å¸â€œÂ Total Words", total_words)
+    col3.metric("Ã°Å¸â€˜Â¤ Speakers", total_speakers)
+    col4.metric("Ã°Å¸Å’Â Languages", total_languages)
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("📊 Average Words", round(average_words, 2))
-    col2.metric("🧠 Total Events", total_events)
-    col3.metric("💾 Database Rows", len(df))
-    col4.metric("🟢 System", "Online")
+    col1.metric("Ã°Å¸â€œÅ  Average Words", round(average_words, 2))
+    col2.metric("Ã°Å¸Â§Â  Total Events", total_events)
+    col3.metric("Ã°Å¸â€™Â¾ Database Rows", len(df))
+    col4.metric("Ã°Å¸Å¸Â¢ System", "Online")
 
     st.markdown("---")
 
@@ -278,18 +371,18 @@ if page == "📊 Dashboard":
         col1, col2 = st.columns(2)
 
         with col1:
-            st.subheader("🌐 Language Distribution")
+            st.subheader("Ã°Å¸Å’Â Language Distribution")
             st.bar_chart(
                 df["language"].fillna("Unknown").value_counts()
             )
 
         with col2:
-            st.subheader("👤 Speaker Activity")
+            st.subheader("Ã°Å¸â€˜Â¤ Speaker Activity")
             st.bar_chart(
                 df["speaker"].fillna("Unknown").value_counts()
             )
 
-        st.subheader("🧠 Event Statistics")
+        st.subheader("Ã°Å¸Â§Â  Event Statistics")
         counts = event_counts(df)
         if counts:
             event_df = pd.DataFrame(
@@ -300,7 +393,7 @@ if page == "📊 Dashboard":
         else:
             st.info("No events detected yet.")
 
-        st.subheader("📈 Conversation Trend")
+        st.subheader("Ã°Å¸â€œË† Conversation Trend")
 
         trend_df = df.copy()
 
@@ -325,7 +418,7 @@ if page == "📊 Dashboard":
         else:
             st.info("Timestamp data is not available.")
 
-        st.subheader("🕒 Recent Conversations")
+        st.subheader("Ã°Å¸â€¢â€™ Recent Conversations")
         recent = df.head(10)[
             ["id", "timestamp", "transcript", "language", "speaker"]
         ]
@@ -338,15 +431,15 @@ if page == "📊 Dashboard":
         )
 
     st.markdown("---")
-    st.subheader("🚀 Data Science Platform")
+    st.subheader("Ã°Å¸Å¡â‚¬ Data Science Platform")
 
     cards = [
-        ("😊 NLP", "Text analysis, keywords and sentiment"),
-        ("👥 Segmentation", "RFM customer intelligence"),
-        ("🚨 Fraud", "Machine-learning risk detection"),
-        ("📈 Forecasting", "Sales trend and prediction"),
-        ("🔬 EDA", "Data quality and statistics"),
-        ("🤖 ML", "Classification and regression")
+        ("Ã°Å¸ËœÅ  NLP", "Text analysis, keywords and sentiment"),
+        ("Ã°Å¸â€˜Â¥ Segmentation", "RFM customer intelligence"),
+        ("Ã°Å¸Å¡Â¨ Fraud", "Machine-learning risk detection"),
+        ("Ã°Å¸â€œË† Forecasting", "Sales trend and prediction"),
+        ("Ã°Å¸â€Â¬ EDA", "Data quality and statistics"),
+        ("Ã°Å¸Â¤â€“ ML", "Classification and regression")
     ]
 
     cols = st.columns(3)
@@ -359,173 +452,340 @@ if page == "📊 Dashboard":
 # SPEECH TO TEXT
 # ============================================================
 
-elif page == "🎙️ Speech-to-Text":
+elif page == "Ã°Å¸Å½â„¢Ã¯Â¸Â Speech-to-Text":
 
-    st.header("🎙️ Speech-to-Text")
+    st.header("Speech-to-Text")
     st.write("Record your voice and convert it into conversation intelligence.")
+
+    st.info(
+        "Select the language you will speak, record your audio, "
+        "and then convert it into text."
+    )
+
+    st.session_state.setdefault("voxintel_transcript", "")
+    st.session_state.setdefault("voxintel_language", "")
+    st.session_state.setdefault("voxintel_events", [])
+    st.session_state.setdefault("voxintel_saved", False)
 
     try:
         import speech_recognition as sr
         from audiorecorder import audiorecorder
 
+        language_options = {
+            "English (India)": "en-IN",
+            "English (US)": "en-US",
+            "Telugu": "te-IN",
+            "Hindi": "hi-IN",
+        }
+
+        selected_language = st.selectbox(
+            "Select spoken language",
+            options=list(language_options.keys()),
+            key="voxintel_recognition_language_choice",
+        )
+        recognition_language = language_options[selected_language]
+
+        st.caption(
+            f"Recognition language: {selected_language} "
+            f"({recognition_language})"
+        )
+
+        st.subheader("Audio Recording")
+        st.caption(
+            "Click Start Recording, speak clearly, and click Stop Recording."
+        )
+
         audio = audiorecorder(
-            "▶️ Start Recording",
-            "⏹️ Stop Recording"
+            "Start Recording",
+            "Stop Recording"
         )
 
         if len(audio) > 0:
-            st.success("✅ Audio recorded successfully!")
+            st.success("Audio recorded successfully!")
 
             audio_preview = io.BytesIO()
             audio.export(audio_preview, format="wav")
             audio_preview.seek(0)
+
             st.audio(audio_preview, format="audio/wav")
 
             if st.button(
-                "🔊 Convert Speech to Text",
-                type="primary"
+                "Convert Speech to Text",
+                type="primary",
+                key="voxintel_convert_speech"
             ):
-                recognizer = sr.Recognizer()
-                wav_buffer = io.BytesIO()
-                audio.export(wav_buffer, format="wav")
-                wav_buffer.seek(0)
-
                 try:
-                    with sr.AudioFile(wav_buffer) as source:
-                        audio_data = recognizer.record(source)
+                    recognizer = sr.Recognizer()
+                    wav_buffer = io.BytesIO()
 
-                    text_result = recognizer.recognize_google(
-                        audio_data
-                    ).strip()
+                    with st.spinner(
+                        f"Converting your speech in {selected_language}..."
+                    ):
+                        audio.export(wav_buffer, format="wav")
+                        wav_buffer.seek(0)
+
+                        with sr.AudioFile(wav_buffer) as source:
+                            audio_data = recognizer.record(source)
+
+                        text_result = recognizer.recognize_google(
+                            audio_data,
+                            language=recognition_language
+                        ).strip()
 
                     if text_result:
-                        st.success("✅ Speech recognized successfully!")
-                        st.subheader("📄 Transcript")
-                        st.text_area(
-                            "Recognized Text",
-                            text_result,
-                            height=150
+                        st.session_state["voxintel_transcript"] = text_result
+                        st.session_state["voxintel_language"] = (
+                            language_detector.detect_language(text_result)
                         )
-
-                        detected_language = (
-                            language_detector.detect_language(
-                                text_result
-                            )
+                        st.session_state["voxintel_events"] = (
+                            event_extractor.extract_events(text_result)
                         )
-                        detected_events = (
-                            event_extractor.extract_events(
-                                text_result
-                            )
+                        st.session_state["voxintel_saved"] = False
+
+                        st.success("Speech recognized successfully!")
+                        st.rerun()
+                    else:
+                        st.warning(
+                            "No speech was detected. Please record again."
                         )
-
-                        col1, col2 = st.columns(2)
-                        col1.metric(
-                            "🌐 Language",
-                            detected_language
-                        )
-                        col2.metric(
-                            "🧠 Events",
-                            len(detected_events)
-                        )
-
-                        if detected_events:
-                            st.subheader("🧠 Detected Events")
-                            for event in detected_events:
-                                st.json(event)
-
-                        if st.button("💾 Save Conversation"):
-                            speaker = speaker_detector.assign_speaker(
-                                "voice_001"
-                            )
-
-                            memory.add_conversation(
-                                speaker=speaker,
-                                text=text_result,
-                                language=detected_language,
-                                events=detected_events
-                            )
-
-                            database.save_conversation(
-                                transcript=text_result,
-                                language=detected_language,
-                                speaker=speaker,
-                                events=detected_events
-                            )
-
-                            st.success(
-                                "✅ Conversation saved successfully!"
-                            )
-                            st.rerun()
 
                 except sr.UnknownValueError:
-                    st.error("❌ Speech could not be understood.")
-                except sr.RequestError as e:
-                    st.error(f"❌ Speech recognition service error: {e}")
-                except Exception as e:
-                    st.error(f"❌ Error: {e}")
+                    st.warning(
+                        "Speech could not be understood. "
+                        "Speak clearly and try recording again."
+                    )
 
-    except ImportError:
-        st.error("Speech-to-Text dependencies are missing.")
-        st.code(
-            "pip install SpeechRecognition audio-recorder-streamlit"
-        )
+                except sr.RequestError as exc:
+                    st.error(
+                        "Could not connect to Google Speech Recognition. "
+                        "Check your internet connection and try again."
+                    )
+                    st.caption(f"Technical details: {exc}")
+
+                except Exception as exc:
+                    st.error(f"Transcription failed: {exc}")
+
+        else:
+            st.info(
+                "No audio recorded yet. Use the recording controls above "
+                "to begin."
+            )
+
+        # Display the transcript outside the conversion button.
+        text_result = st.session_state["voxintel_transcript"]
+
+        if text_result:
+            st.subheader("Transcript")
+
+            st.text_area(
+                "Recognized Text",
+                value=text_result,
+                height=150,
+                disabled=True,
+                key="voxintel_transcript_display"
+            )
+
+            detected_language = st.session_state["voxintel_language"]
+            detected_events = st.session_state["voxintel_events"]
+
+            col1, col2 = st.columns(2)
+            col1.metric("Language", detected_language)
+            col2.metric("Events", len(detected_events))
+
+            if detected_events:
+                st.subheader("Detected Events")
+                display_event_cards(detected_events)
+
+            if st.session_state["voxintel_saved"]:
+                st.success(
+                    f"Conversation already saved. "
+                    f"Database ID: {st.session_state.get('voxintel_saved_id', 'Unknown')}"
+                )
+
+            elif st.button(
+                "Save Conversation",
+                type="primary",
+                key="voxintel_save_conversation"
+            ):
+                try:
+                    speaker = speaker_detector.assign_speaker("voice_001")
+                    analysis = SentimentAnalyzer().analyze(text_result)
+
+                    conversation_id = database.save_conversation(
+                        transcript=text_result,
+                        language=detected_language,
+                        speaker=speaker,
+                        events=detected_events,
+                        sentiment=analysis["sentiment"],
+                        polarity=analysis["polarity"],
+                        subjectivity=analysis["subjectivity"],
+                        confidence=None
+                    )
+
+                    st.session_state["voxintel_saved"] = True
+                    st.session_state["voxintel_saved_id"] = conversation_id
+
+                    try:
+                        memory.add_conversation(
+                            speaker=speaker,
+                            text=text_result,
+                            language=detected_language,
+                            events=detected_events
+                        )
+                    except Exception as memory_error:
+                        st.warning(
+                            f"Cloud save succeeded, but local memory update failed: {memory_error}"
+                        )
+
+                    st.success(
+                        f"Conversation saved successfully! Database ID: {conversation_id}"
+                    )
+                    st.rerun()
+
+                except Exception as exc:
+                    st.error(
+                        f"Could not save conversation to Supabase: {exc}"
+                    )
+
+    except ImportError as exc:
+        st.error(f"Speech-to-Text dependency is missing: {exc}")
+
+    except Exception as exc:
+        st.error(f"Speech-to-Text error: {exc}")
 
 
-# ============================================================
-# CONVERSATION INTELLIGENCE
-# ============================================================
+elif "Conversation Intelligence" in page:
 
-elif page == "🧠 Conversation Intelligence":
-
-    st.header("🧠 Conversation Intelligence")
+    st.header("?? Conversation Intelligence")
     st.write(
-        "Analyze multilingual conversations using language detection, "
+        "Analyze saved and new conversations using language detection, "
         "speaker identification and event extraction."
     )
 
+    st.subheader("?? Analyze Saved Conversations")
+
+    if df.empty:
+        st.info("No saved conversations are available in the database.")
+    else:
+        conversation_options = list(range(len(df)))
+
+        selected_index = st.selectbox(
+            "Select a saved conversation",
+            options=conversation_options,
+            format_func=lambda index: (
+                f"ID {df.iloc[index]['id']} | "
+                f"{str(df.iloc[index]['transcript'])[:75]}"
+            ),
+            key="ci_saved_conversation"
+        )
+
+        selected_row = df.iloc[selected_index]
+        saved_transcript = str(
+            selected_row.get("transcript", "")
+        ).strip()
+
+        with st.expander("?? View Saved Transcript", expanded=True):
+            st.write(saved_transcript)
+
+        if st.button(
+            "?? Analyze Selected Conversation",
+            type="primary",
+            key="ci_analyze_saved"
+        ):
+            if not saved_transcript or saved_transcript.lower() == "nan":
+                st.warning("This conversation has no transcript.")
+            else:
+                try:
+                    language = language_detector.detect_language(
+                        saved_transcript
+                    )
+
+                    stored_speaker = selected_row.get("speaker")
+
+                    if (
+                        stored_speaker is None
+                        or str(stored_speaker).strip().lower()
+                        in ("", "nan", "none")
+                    ):
+                        speaker = speaker_detector.assign_speaker(
+                            "voice_001"
+                        )
+                    else:
+                        speaker = str(stored_speaker)
+
+                    events = event_extractor.extract_events(
+                        saved_transcript
+                    )
+
+                    st.success("Saved conversation analyzed successfully!")
+
+                    col1, col2, col3 = st.columns(3)
+                    col1.metric("?? Language", language)
+                    col2.metric("?? Speaker", speaker)
+                    col3.metric(
+                        "?? Events",
+                        len(events) if events is not None else 0
+                    )
+
+                    st.subheader("?? Transcript")
+                    st.write(saved_transcript)
+
+                    st.subheader("?? Extracted Events")
+
+                    display_event_cards(events)
+
+                except Exception as exc:
+                    st.error(f"Conversation analysis failed: {exc}")
+
+    st.divider()
+    st.subheader("?? Analyze New Text")
+
     text_input = st.text_area(
         "Enter conversation text",
-        height=180,
+        height=150,
         placeholder=(
             "Example: We have a meeting tomorrow at 10 AM "
             "in Hyderabad. Please remind me to call Rahul."
-        )
+        ),
+        key="ci_manual_text"
     )
 
     if st.button(
-        "🔍 Analyze Conversation",
-        type="primary"
+        "?? Analyze New Text",
+        key="ci_analyze_manual"
     ):
         if not text_input.strip():
             st.warning("Please enter some text.")
         else:
-            language = language_detector.detect_language(text_input)
-            speaker = speaker_detector.assign_speaker("voice_001")
-            events = event_extractor.extract_events(text_input)
+            try:
+                language = language_detector.detect_language(text_input)
+                speaker = speaker_detector.assign_speaker("voice_001")
+                events = event_extractor.extract_events(text_input)
 
-            col1, col2, col3 = st.columns(3)
-            col1.metric("🌐 Language", language)
-            col2.metric("👤 Speaker", speaker)
-            col3.metric("🧠 Events", len(events))
+                st.success("Conversation analyzed successfully!")
 
-            st.subheader("📄 Transcript")
-            st.write(text_input)
+                col1, col2, col3 = st.columns(3)
+                col1.metric("?? Language", language)
+                col2.metric("?? Speaker", speaker)
+                col3.metric(
+                    "?? Events",
+                    len(events) if events is not None else 0
+                )
 
-            st.subheader("🧠 Extracted Events")
-            if events:
-                for event in events:
-                    st.json(event)
-            else:
-                st.info("No events detected.")
+                st.subheader("?? Transcript")
+                st.write(text_input)
+
+                st.subheader("?? Extracted Events")
+
+                display_event_cards(events)
+
+            except Exception as exc:
+                st.error(f"Conversation analysis failed: {exc}")
 
 
-# ============================================================
-# SENTIMENT & NLP
-# ============================================================
+elif page == "Ã°Å¸ËœÅ  Sentiment & NLP":
 
-elif page == "😊 Sentiment & NLP":
-
-    st.header("😊 Sentiment & NLP")
+    st.header("Ã°Å¸ËœÅ  Sentiment & NLP")
     st.write(
         "Analyze conversation text using NLP, sentiment analysis, "
         "keywords and text statistics."
@@ -537,7 +797,7 @@ elif page == "😊 Sentiment & NLP":
         placeholder="Example: The customer is very happy with our service."
     )
 
-    if st.button("🧠 Run NLP Analysis", type="primary"):
+    if st.button("Ã°Å¸Â§Â  Run NLP Analysis", type="primary"):
 
         if not text.strip():
             st.warning("Please enter text.")
@@ -551,20 +811,20 @@ elif page == "😊 Sentiment & NLP":
             keywords = analyzer.keywords(text, 10)
             summary = advanced.text_summary(text)
 
-            st.subheader("😊 Sentiment")
+            st.subheader("Ã°Å¸ËœÅ  Sentiment")
             c1, c2, c3 = st.columns(3)
             c1.metric("Sentiment", result["sentiment"])
             c2.metric("Polarity", round(result["polarity"], 3))
             c3.metric("Subjectivity", round(result["subjectivity"], 3))
 
-            st.subheader("📝 Text Statistics")
+            st.subheader("Ã°Å¸â€œÂ Text Statistics")
             c1, c2, c3, c4 = st.columns(4)
             c1.metric("Characters", stats["characters"])
             c2.metric("Words", stats["words"])
             c3.metric("Unique Words", stats["unique_words"])
             c4.metric("Sentences", stats["sentences"])
 
-            st.subheader("🔑 Top Keywords")
+            st.subheader("Ã°Å¸â€â€˜ Top Keywords")
             keyword_df = pd.DataFrame(
                 keywords,
                 columns=["Keyword", "Frequency"]
@@ -575,17 +835,229 @@ elif page == "😊 Sentiment & NLP":
                 hide_index=True
             )
 
-            st.subheader("🧠 Advanced NLP Summary")
+            st.subheader("Ã°Å¸Â§Â  Advanced NLP Summary")
             st.json(summary)
+
+
+    # ========================================================
+    # HUMAN SENTIMENT REVIEW
+    # ========================================================
+
+    st.divider()
+    st.header("Human Review")
+
+    if df.empty:
+        st.info("No conversations are available for review.")
+    else:
+        review_data = df.copy()
+        review_data = review_data.dropna(subset=["id", "transcript"])
+        review_data["reviewed_sentiment"] = (
+            review_data["reviewed_sentiment"].fillna("").astype(str)
+        )
+        review_data["sentiment"] = (
+            review_data["sentiment"].fillna("").astype(str)
+        )
+
+        labels = ["Negative", "Neutral", "Positive"]
+
+        reviewed_data = review_data[
+            review_data["reviewed_sentiment"].isin(labels)
+        ]
+        pending_data = review_data[
+            ~review_data["reviewed_sentiment"].isin(labels)
+        ]
+
+        total_count = len(review_data)
+        reviewed_count = len(reviewed_data)
+        pending_count = len(pending_data)
+
+        metric1, metric2, metric3 = st.columns(3)
+        metric1.metric("Total Conversations", total_count)
+        metric2.metric("Human Reviewed", reviewed_count)
+        metric3.metric("Pending Reviews", pending_count)
+
+        st.subheader("Review Conversations")
+
+        review_data["_reviewed"] = (
+            review_data["reviewed_sentiment"].isin(labels)
+        )
+        review_data = review_data.sort_values(
+            ["_reviewed", "id"],
+            ascending=[True, False]
+        )
+
+        conversation_ids = [
+            int(value) for value in review_data["id"].tolist()
+        ]
+
+        review_labels = {}
+        for _, row in review_data.iterrows():
+            conversation_id = int(row["id"])
+            transcript_preview = str(row["transcript"]).replace("\n", " ")
+            review_labels[conversation_id] = (
+                f"ID {conversation_id} | {transcript_preview[:65]}"
+            )
+
+        selected_id = st.selectbox(
+            "Select a conversation",
+            options=conversation_ids,
+            format_func=lambda value: review_labels[value],
+            key="human_review_conversation"
+        )
+
+        selected_row = review_data[
+            review_data["id"].astype(int) == selected_id
+        ].iloc[0]
+
+        st.markdown("**Conversation transcript**")
+        st.write(selected_row["transcript"])
+
+        st.write(
+            "AI-predicted sentiment:",
+            selected_row["sentiment"] or "Not available"
+        )
+
+        current_review = selected_row["reviewed_sentiment"]
+        default_index = (
+            labels.index(current_review)
+            if current_review in labels else 0
+        )
+
+        reviewed_sentiment = st.selectbox(
+            "Your human sentiment classification",
+            labels,
+            index=default_index,
+            key=f"human_review_label_{selected_id}"
+        )
+
+        current_notes = selected_row["review_notes"]
+        if pd.isna(current_notes):
+            current_notes = ""
+
+        review_notes = st.text_area(
+            "Review notes",
+            value=str(current_notes),
+            placeholder="Explain why you selected this sentiment...",
+            key=f"human_review_notes_{selected_id}"
+        )
+
+        if st.button("Save Human Review", type="primary"):
+            try:
+                database.save_review(
+                    conversation_id=selected_id,
+                    reviewed_sentiment=reviewed_sentiment,
+                    review_notes=review_notes.strip()
+                )
+                st.success("Human review saved successfully to Supabase.")
+                st.rerun()
+            except Exception as exc:
+                st.error(f"Could not save review: {exc}")
+
+        # ====================================================
+        # SENTIMENT MODEL EVALUATION
+        # ====================================================
+
+        st.divider()
+        st.header("Sentiment Model Evaluation")
+
+        evaluation_data = review_data[
+            review_data["reviewed_sentiment"].isin(labels)
+            & review_data["sentiment"].isin(labels)
+        ].copy()
+
+        if evaluation_data.empty:
+            st.info(
+                "Model evaluation requires conversations with both "
+                "an AI prediction and a human-reviewed sentiment."
+            )
+        else:
+            from sklearn.metrics import (
+                accuracy_score,
+                precision_score,
+                recall_score,
+                f1_score,
+                confusion_matrix,
+                classification_report
+            )
+
+            actual = evaluation_data["reviewed_sentiment"]
+            predicted = evaluation_data["sentiment"]
+
+            accuracy = accuracy_score(actual, predicted)
+            precision = precision_score(
+                actual, predicted, labels=labels,
+                average="macro", zero_division=0
+            )
+            recall = recall_score(
+                actual, predicted, labels=labels,
+                average="macro", zero_division=0
+            )
+            f1 = f1_score(
+                actual, predicted, labels=labels,
+                average="macro", zero_division=0
+            )
+
+            st.caption(
+                f"Evaluation uses {len(evaluation_data)} conversations "
+                "that have both AI predictions and human labels."
+            )
+
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Accuracy", f"{accuracy:.1%}")
+            m2.metric("Macro Precision", f"{precision:.1%}")
+            m3.metric("Macro Recall", f"{recall:.1%}")
+            m4.metric("Macro F1-score", f"{f1:.1%}")
+
+            st.subheader("Confusion Matrix")
+
+            matrix = confusion_matrix(
+                actual,
+                predicted,
+                labels=labels
+            )
+
+            matrix_df = pd.DataFrame(
+                matrix,
+                index=[f"Actual {label}" for label in labels],
+                columns=[f"AI {label}" for label in labels]
+            )
+
+            st.dataframe(
+                matrix_df,
+                width="stretch"
+            )
+
+            st.subheader("Classification Report")
+
+            report = classification_report(
+                actual,
+                predicted,
+                labels=labels,
+                output_dict=True,
+                zero_division=0
+            )
+
+            report_df = pd.DataFrame(report).T
+
+            st.dataframe(
+                report_df.round(3),
+                width="stretch"
+            )
+
+            st.caption(
+                "Human labels are treated as reference labels. "
+                "AI predictions are not modified by this evaluation."
+            )
+
 
 
 # ============================================================
 # CUSTOMER SEGMENTATION
 # ============================================================
 
-elif page == "👥 Customer Segmentation":
+elif page == "Ã°Å¸â€˜Â¥ Customer Segmentation":
 
-    st.header("👥 Customer Segmentation")
+    st.header("Ã°Å¸â€˜Â¥ Customer Segmentation")
     st.write(
         "Segment customers using Recency, Frequency and Monetary (RFM) analysis."
     )
@@ -630,7 +1102,7 @@ elif page == "👥 Customer Segmentation":
             )
 
             if st.button(
-                "👥 Run Customer Segmentation",
+                "Ã°Å¸â€˜Â¥ Run Customer Segmentation",
                 type="primary"
             ):
                 try:
@@ -642,7 +1114,7 @@ elif page == "👥 Customer Segmentation":
                         clusters
                     )
 
-                    st.subheader("📊 Customer Segments")
+                    st.subheader("Ã°Å¸â€œÅ  Customer Segments")
                     st.dataframe(
                         rfm,
                         width="stretch",
@@ -651,7 +1123,7 @@ elif page == "👥 Customer Segmentation":
 
                     summary = segmenter.segment_summary(rfm)
 
-                    st.subheader("📈 Segment Summary")
+                    st.subheader("Ã°Å¸â€œË† Segment Summary")
                     st.dataframe(
                         summary,
                         width="stretch",
@@ -677,9 +1149,9 @@ elif page == "👥 Customer Segmentation":
 # FRAUD DETECTION
 # ============================================================
 
-elif page == "🚨 Fraud Detection":
+elif page == "Ã°Å¸Å¡Â¨ Fraud Detection":
 
-    st.header("🚨 Fraud Detection")
+    st.header("Ã°Å¸Å¡Â¨ Fraud Detection")
     st.write(
         "Train a Random Forest model to identify potentially fraudulent transactions."
     )
@@ -705,7 +1177,7 @@ elif page == "🚨 Fraud Detection":
         )
 
         if st.button(
-            "🚨 Train Fraud Model",
+            "Ã°Å¸Å¡Â¨ Train Fraud Model",
             type="primary"
         ):
             try:
@@ -718,7 +1190,7 @@ elif page == "🚨 Fraud Detection":
                 c3.metric("Recall", f"{metrics['recall']:.2%}")
                 c4.metric("F1 Score", f"{metrics['f1']:.2%}")
 
-                st.subheader("🔍 Feature Importance")
+                st.subheader("Ã°Å¸â€Â Feature Importance")
                 importance = detector.feature_importance()
                 st.dataframe(
                     importance,
@@ -744,9 +1216,9 @@ elif page == "🚨 Fraud Detection":
 # SALES FORECASTING
 # ============================================================
 
-elif page == "📈 Sales Forecasting":
+elif page == "Ã°Å¸â€œË† Sales Forecasting":
 
-    st.header("📈 Sales Forecasting")
+    st.header("Ã°Å¸â€œË† Sales Forecasting")
     st.write(
         "Analyze historical sales trends, moving averages and future sales."
     )
@@ -786,7 +1258,7 @@ elif page == "📈 Sales Forecasting":
             )
 
             if st.button(
-                "📈 Generate Forecast",
+                "Ã°Å¸â€œË† Generate Forecast",
                 type="primary"
             ):
                 try:
@@ -834,19 +1306,19 @@ elif page == "📈 Sales Forecasting":
                         trend["direction"]
                     )
 
-                    st.subheader("📊 Historical Sales")
+                    st.subheader("Ã°Å¸â€œÅ  Historical Sales")
                     historical_chart = prepared.set_index(date_col)[
                         [sales_col]
                     ]
                     st.line_chart(historical_chart)
 
-                    st.subheader("📉 Moving Average")
+                    st.subheader("Ã°Å¸â€œâ€° Moving Average")
                     moving_chart = moving.set_index(date_col)[
                         [sales_col, "Moving Average"]
                     ]
                     st.line_chart(moving_chart)
 
-                    st.subheader("🔮 Future Sales Forecast")
+                    st.subheader("Ã°Å¸â€Â® Future Sales Forecast")
                     st.dataframe(
                         forecast,
                         width="stretch",
@@ -876,9 +1348,9 @@ elif page == "📈 Sales Forecasting":
 # BUSINESS ANALYTICS
 # ============================================================
 
-elif page == "📊 Business Analytics":
+elif page == "Ã°Å¸â€œÅ  Business Analytics":
 
-    st.header("📊 Business Analytics")
+    st.header("Ã°Å¸â€œÅ  Business Analytics")
     st.write(
         "Generate KPIs, group analysis, customer analysis and business insights."
     )
@@ -911,7 +1383,7 @@ elif page == "📊 Business Analytics":
             )
 
             if st.button(
-                "📊 Analyze Business Data",
+                "Ã°Å¸â€œÅ  Analyze Business Data",
                 type="primary"
             ):
                 try:
@@ -928,14 +1400,14 @@ elif page == "📊 Business Analytics":
                         summary["total_numeric_columns"]
                     )
 
-                    st.subheader("💰 KPI Analysis")
+                    st.subheader("Ã°Å¸â€™Â° KPI Analysis")
                     st.json(kpi)
 
-                    st.subheader("💡 Business Insights")
+                    st.subheader("Ã°Å¸â€™Â¡ Business Insights")
                     for insight in insights:
                         st.info(insight)
 
-                    st.subheader("🚨 Outlier Analysis")
+                    st.subheader("Ã°Å¸Å¡Â¨ Outlier Analysis")
                     outliers = business.detect_outliers(value_col)
                     st.write(
                         f"Outliers detected: **{outliers['count']}**"
@@ -968,9 +1440,9 @@ elif page == "📊 Business Analytics":
 # EDA & STATISTICS
 # ============================================================
 
-elif page == "🔬 EDA & Statistics":
+elif page == "Ã°Å¸â€Â¬ EDA & Statistics":
 
-    st.header("🔬 EDA & Statistics")
+    st.header("Ã°Å¸â€Â¬ EDA & Statistics")
     st.write(
         "Explore data quality, descriptive statistics, correlations and distributions."
     )
@@ -995,26 +1467,26 @@ elif page == "🔬 EDA & Statistics":
         c3.metric("Missing Values", summary["missing_values"])
         c4.metric("Duplicates", summary["duplicate_rows"])
 
-        st.subheader("👀 Dataset Preview")
+        st.subheader("Ã°Å¸â€˜â‚¬ Dataset Preview")
         st.dataframe(
             data.head(20),
             width="stretch",
             hide_index=True
         )
 
-        st.subheader("📋 Data Types")
+        st.subheader("Ã°Å¸â€œâ€¹ Data Types")
         st.dataframe(
             eda.data_types().rename("Data Type").to_frame(),
             width="stretch"
         )
 
-        st.subheader("📊 Descriptive Statistics")
+        st.subheader("Ã°Å¸â€œÅ  Descriptive Statistics")
         st.dataframe(
             stats.numeric_summary(),
             width="stretch"
         )
 
-        st.subheader("🔗 Correlation Matrix")
+        st.subheader("Ã°Å¸â€â€” Correlation Matrix")
         correlation = eda.correlation()
         if not correlation.empty:
             st.dataframe(
@@ -1028,7 +1500,7 @@ elif page == "🔬 EDA & Statistics":
         categorical_columns = eda.categorical_columns()
 
         if numeric_columns:
-            st.subheader("📈 Numeric Visualization")
+            st.subheader("Ã°Å¸â€œË† Numeric Visualization")
             selected_numeric = st.selectbox(
                 "Select numeric column",
                 numeric_columns,
@@ -1042,7 +1514,7 @@ elif page == "🔬 EDA & Statistics":
             st.plotly_chart(fig, width="stretch")
 
         if categorical_columns:
-            st.subheader("📊 Categorical Visualization")
+            st.subheader("Ã°Å¸â€œÅ  Categorical Visualization")
             selected_category = st.selectbox(
                 "Select categorical column",
                 categorical_columns,
@@ -1063,9 +1535,9 @@ elif page == "🔬 EDA & Statistics":
 # MACHINE LEARNING
 # ============================================================
 
-elif page == "🤖 Machine Learning":
+elif page == "Ã°Å¸Â¤â€“ Machine Learning":
 
-    st.header("🤖 Machine Learning")
+    st.header("Ã°Å¸Â¤â€“ Machine Learning")
     st.write(
         "Train classification or regression models on uploaded datasets."
     )
@@ -1115,7 +1587,7 @@ elif page == "🤖 Machine Learning":
             )
 
         if st.button(
-            "🤖 Train Machine Learning Model",
+            "Ã°Å¸Â¤â€“ Train Machine Learning Model",
             type="primary"
         ):
             try:
@@ -1153,7 +1625,7 @@ elif page == "🤖 Machine Learning":
 
                     c1, c2, c3 = st.columns(3)
                     c1.metric(
-                        "R²",
+                        "RÃ‚Â²",
                         f"{result['r2']:.4f}"
                     )
                     c2.metric(
@@ -1180,9 +1652,9 @@ elif page == "🤖 Machine Learning":
 # KNOWLEDGE GRAPH
 # ============================================================
 
-elif page == "🕸️ Knowledge Graph":
+elif page == "Ã°Å¸â€¢Â¸Ã¯Â¸Â Knowledge Graph":
 
-    st.header("🕸️ Interactive Knowledge Graph")
+    st.header("Ã°Å¸â€¢Â¸Ã¯Â¸Â Interactive Knowledge Graph")
     st.write(
         "Explore relationships between conversations, speakers, "
         "languages, events and transcripts."
@@ -1324,8 +1796,8 @@ elif page == "🕸️ Knowledge Graph":
             )
 
             col1, col2 = st.columns(2)
-            col1.metric("🔵 Nodes", len(nodes))
-            col2.metric("🔗 Relationships", len(edges))
+            col1.metric("Ã°Å¸â€Âµ Nodes", len(nodes))
+            col2.metric("Ã°Å¸â€â€” Relationships", len(edges))
 
     except ImportError:
         st.error("streamlit-agraph is not installed.")
@@ -1338,9 +1810,9 @@ elif page == "🕸️ Knowledge Graph":
 # CONVERSATION DATABASE
 # ============================================================
 
-elif page == "💾 Conversation Database":
+elif page == "Ã°Å¸â€™Â¾ Conversation Database":
 
-    st.header("💾 Conversation Database")
+    st.header("Ã°Å¸â€™Â¾ Conversation Database")
 
     if df.empty:
         st.info("No conversations stored.")
@@ -1354,12 +1826,12 @@ elif page == "💾 Conversation Database":
         )
 
         st.markdown("---")
-        st.subheader("📥 Export Database")
+        st.subheader("Ã°Å¸â€œÂ¥ Export Database")
 
         csv_data = df.to_csv(index=False)
 
         st.download_button(
-            label="⬇️ Download CSV",
+            label="Ã¢Â¬â€¡Ã¯Â¸Â Download CSV",
             data=csv_data,
             file_name="voxintel_conversations.csv",
             mime="text/csv"
@@ -1370,14 +1842,14 @@ elif page == "💾 Conversation Database":
 # CONVERSATION ANALYTICS
 # ============================================================
 
-elif page == "📈 Analytics":
+elif page == "Ã°Å¸â€œË† Analytics":
 
-    st.header("📈 Conversation Analytics")
+    st.header("Ã°Å¸â€œË† Conversation Analytics")
 
     if df.empty:
         st.info("No conversation data available.")
     else:
-        st.subheader("🌐 Language Analytics")
+        st.subheader("Ã°Å¸Å’Â Language Analytics")
 
         language_distribution = (
             df["language"]
@@ -1399,7 +1871,7 @@ elif page == "📈 Analytics":
             )
 
         st.markdown("---")
-        st.subheader("👤 Speaker Analytics")
+        st.subheader("Ã°Å¸â€˜Â¤ Speaker Analytics")
 
         speaker_distribution = (
             df["speaker"]
@@ -1421,7 +1893,7 @@ elif page == "📈 Analytics":
             )
 
         st.markdown("---")
-        st.subheader("📝 Conversation Length")
+        st.subheader("Ã°Å¸â€œÂ Conversation Length")
 
         word_counts = [
             len(str(text).split())
@@ -1438,7 +1910,7 @@ elif page == "📈 Analytics":
         )
 
         st.markdown("---")
-        st.subheader("🧠 Event Analytics")
+        st.subheader("Ã°Å¸Â§Â  Event Analytics")
 
         counts = event_counts(df)
 
@@ -1468,12 +1940,12 @@ elif page == "📈 Analytics":
 st.markdown("---")
 
 st.caption(
-    "VOXINTEL — AI-Powered Multilingual Conversation & "
+    "VOXINTEL Ã¢â‚¬â€ AI-Powered Multilingual Conversation & "
     "Customer Intelligence Platform"
 )
 
 st.caption(
-    "Speech → Text → Language → Speaker → Events → "
-    "Memory → Database → NLP → Customer Intelligence → "
-    "Data Science → Business Insights"
+    "Speech Ã¢â€ â€™ Text Ã¢â€ â€™ Language Ã¢â€ â€™ Speaker Ã¢â€ â€™ Events Ã¢â€ â€™ "
+    "Memory Ã¢â€ â€™ Database Ã¢â€ â€™ NLP Ã¢â€ â€™ Customer Intelligence Ã¢â€ â€™ "
+    "Data Science Ã¢â€ â€™ Business Insights"
 )

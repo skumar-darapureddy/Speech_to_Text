@@ -1,4 +1,4 @@
-﻿import streamlit as st
+import streamlit as st
 import pandas as pd
 import io
 import ast
@@ -30,7 +30,7 @@ from business.sales_forecasting import SalesForecaster
 
 st.set_page_config(
     page_title="VOXINTEL",
-    page_icon="Ã°Å¸Å½â„¢Ã¯Â¸Â",
+    page_icon="🎙️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -153,16 +153,16 @@ def display_event_cards(events):
         return
 
     event_styles = {
-        "Meeting": ("MEETING", "??", "#2563EB"),
-        "Reminder": ("REMINDER", "??", "#D97706"),
-        "Call": ("CALL", "??", "#059669"),
-        "Task": ("TASK", "??", "#7C3AED"),
-        "Question": ("QUESTION", "?", "#0891B2"),
-        "Time": ("TIME", "??", "#64748B"),
-        "Date": ("DATE", "??", "#64748B"),
-        "Location": ("LOCATION", "??", "#64748B"),
-        "Phone": ("PHONE", "??", "#64748B"),
-        "Amount": ("AMOUNT", "??", "#64748B"),
+        "Meeting": ("MEETING", "📅", "#2563EB"),
+        "Reminder": ("REMINDER", "⏰", "#D97706"),
+        "Call": ("CALL", "📞", "#059669"),
+        "Task": ("TASK", "✅", "#7C3AED"),
+        "Question": ("QUESTION", "❓", "#0891B2"),
+        "Time": ("TIME", "🕒", "#64748B"),
+        "Date": ("DATE", "📆", "#64748B"),
+        "Location": ("LOCATION", "📍", "#64748B"),
+        "Phone": ("PHONE", "📱", "#64748B"),
+        "Amount": ("AMOUNT", "💰", "#64748B"),
     }
 
     field_labels = [
@@ -204,7 +204,7 @@ def display_event_cards(events):
 
         title, icon, accent = event_styles.get(
             event_type,
-            (event_type.upper(), "?", "#64748B")
+            (event_type.upper(), "🔹", "#64748B")
         )
 
         details = [
@@ -269,7 +269,7 @@ memory = ConversationMemory()
 # ============================================================
 
 st.markdown(
-    '<div class="main-title">Ã°Å¸Å½â„¢Ã¯Â¸Â VOXINTEL</div>',
+    '<div class="main-title">🎙️ VOXINTEL</div>',
     unsafe_allow_html=True
 )
 
@@ -285,31 +285,31 @@ st.markdown(
 # SIDEBAR
 # ============================================================
 
-st.sidebar.title("Ã°Å¸Å½â„¢Ã¯Â¸Â VOXINTEL")
+st.sidebar.title("🎙️ VOXINTEL")
 st.sidebar.markdown("### AI + Data Science Platform")
 st.sidebar.markdown("---")
 
 page = st.sidebar.radio(
     "Navigation",
     [
-        "Ã°Å¸â€œÅ  Dashboard",
-        "Ã°Å¸Å½â„¢Ã¯Â¸Â Speech-to-Text",
-        "Ã°Å¸Â§Â  Conversation Intelligence",
-        "Ã°Å¸ËœÅ  Sentiment & NLP",
-        "Ã°Å¸â€˜Â¥ Customer Segmentation",
-        "Ã°Å¸Å¡Â¨ Fraud Detection",
-        "Ã°Å¸â€œË† Sales Forecasting",
-        "Ã°Å¸â€œÅ  Business Analytics",
-        "Ã°Å¸â€Â¬ EDA & Statistics",
-        "Ã°Å¸Â¤â€“ Machine Learning",
-        "Ã°Å¸â€¢Â¸Ã¯Â¸Â Knowledge Graph",
-        "Ã°Å¸â€™Â¾ Conversation Database",
-        "Ã°Å¸â€œË† Analytics"
-    ]
+        "\U0001F4CA Dashboard",
+        "\U0001F399\ufe0f Speech-to-Text",
+        "\U0001F9E0 Conversation Intelligence",
+        "\U0001F60A Sentiment & NLP",
+        "\U0001F465 Customer Segmentation",
+        "\U0001F6A8 Fraud Detection",
+        "\U0001F4C8 Sales Forecasting",
+        "\U0001F4BC Business Analytics",
+        "\U0001F4CB EDA & Statistics",
+        "\U0001F4CA Machine Learning",
+        "\U0001F578 Knowledge Graph",
+        "\U0001F5C4 Conversation Database",
+        "\U0001F4CA Analytics"
+]
 )
 
 st.sidebar.markdown("---")
-st.sidebar.success("Ã°Å¸Å¸Â¢ System Online")
+st.sidebar.success("\U0001F7E2 System Online")
 st.sidebar.metric("Conversations", len(df))
 
 total_words_sidebar = (
@@ -320,7 +320,7 @@ st.sidebar.metric("Total Words", total_words_sidebar)
 
 st.sidebar.markdown("---")
 st.sidebar.caption(
-    "Speech Ã¢â€ â€™ NLP Ã¢â€ â€™ Intelligence Ã¢â€ â€™ Data Science Ã¢â€ â€™ Business Insights"
+    "Speech \u2192 NLP \u2192 Intelligence \u2192 Data Science \u2192 Business Insights"
 )
 
 
@@ -328,10 +328,9 @@ st.sidebar.caption(
 # DASHBOARD
 # ============================================================
 
-if page == "Ã°Å¸â€œÅ  Dashboard":
+if page == "\U0001F4CA Dashboard":
 
-    st.header("Ã°Å¸â€œÅ  VOXINTEL Dashboard")
-
+    st.header("\U0001F4CA VOXINTEL Dashboard")
     total_conversations = len(df)
 
     if not df.empty:
@@ -354,16 +353,16 @@ if page == "Ã°Å¸â€œÅ  Dashboard":
         total_events = 0
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Ã°Å¸â€™Â¬ Conversations", total_conversations)
-    col2.metric("Ã°Å¸â€œÂ Total Words", total_words)
-    col3.metric("Ã°Å¸â€˜Â¤ Speakers", total_speakers)
-    col4.metric("Ã°Å¸Å’Â Languages", total_languages)
+    col1.metric("Conversations", total_conversations)
+    col2.metric("Total Words", total_words)
+    col3.metric("Speakers", total_speakers)
+    col4.metric("Languages", total_languages)
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Ã°Å¸â€œÅ  Average Words", round(average_words, 2))
-    col2.metric("Ã°Å¸Â§Â  Total Events", total_events)
-    col3.metric("Ã°Å¸â€™Â¾ Database Rows", len(df))
-    col4.metric("Ã°Å¸Å¸Â¢ System", "Online")
+    col1.metric("Average Words", round(average_words, 2))
+    col2.metric("Total Events", total_events)
+    col3.metric("Database Rows", len(df))
+    col4.metric("System", "Online")
 
     st.markdown("---")
 
@@ -371,18 +370,18 @@ if page == "Ã°Å¸â€œÅ  Dashboard":
         col1, col2 = st.columns(2)
 
         with col1:
-            st.subheader("Ã°Å¸Å’Â Language Distribution")
+            st.subheader("Language Distribution")
             st.bar_chart(
                 df["language"].fillna("Unknown").value_counts()
             )
 
         with col2:
-            st.subheader("Ã°Å¸â€˜Â¤ Speaker Activity")
+            st.subheader("Speaker Activity")
             st.bar_chart(
                 df["speaker"].fillna("Unknown").value_counts()
             )
 
-        st.subheader("Ã°Å¸Â§Â  Event Statistics")
+        st.subheader("Event Statistics")
         counts = event_counts(df)
         if counts:
             event_df = pd.DataFrame(
@@ -393,7 +392,7 @@ if page == "Ã°Å¸â€œÅ  Dashboard":
         else:
             st.info("No events detected yet.")
 
-        st.subheader("Ã°Å¸â€œË† Conversation Trend")
+        st.subheader("Conversation Trend")
 
         trend_df = df.copy()
 
@@ -405,20 +404,87 @@ if page == "Ã°Å¸â€œÅ  Dashboard":
             trend_df = trend_df.dropna(subset=["timestamp"])
 
             if not trend_df.empty:
-                trend_df["Date"] = trend_df["timestamp"].dt.date
                 daily_trend = (
-                    trend_df.groupby("Date")
+                    trend_df
+                    .set_index("timestamp")
+                    .resample("D")
                     .size()
                     .rename("Conversations")
+                    .rename_axis("Date")
+                    .reset_index()
                 )
 
-                st.line_chart(daily_trend)
+                import plotly.express as px
+
+                fig = px.line(
+                    daily_trend,
+                    x="Date",
+                    y="Conversations",
+                    markers=True,
+                    title="Daily Conversation Activity",
+                    labels={
+                        "Date": "Date",
+                        "Conversations": "Number of Conversations"
+                    },
+                    hover_data={
+                        "Date": "|%d %b %Y",
+                        "Conversations": True
+                    }
+                )
+
+                fig.update_traces(
+                    line=dict(width=3),
+                    marker=dict(size=8),
+                    hovertemplate=(
+                        "<b>%{x|%d %b %Y}</b><br>"
+                        "Conversations: %{y}"
+                        "<extra></extra>"
+                    )
+                )
+
+                tickvals = daily_trend["Date"].iloc[::7].tolist()
+                if tickvals[-1] != daily_trend["Date"].iloc[-1]:
+                    tickvals.append(daily_trend["Date"].iloc[-1])
+
+                fig.update_layout(
+                    height=380,
+                    template="plotly_white",
+                    hovermode="x unified",
+                    margin=dict(l=20, r=20, t=55, b=20),
+                    xaxis=dict(
+                        title="Date",
+                        tickformat="%b %d",
+                        tickangle=-30,
+                        tickmode="array",
+                        tickvals=tickvals,
+                        ticktext=[
+                            date.strftime("%b %d") for date in tickvals
+                        ],
+                        range=[
+                            daily_trend["Date"].min(),
+                            daily_trend["Date"].max()
+                        ],
+                        showgrid=False
+                    ),
+                    yaxis=dict(
+                        title="Conversations",
+                        rangemode="tozero",
+                        dtick=1,
+                        gridcolor="rgba(128,128,128,0.15)"
+                    )
+                )
+
+                st.plotly_chart(
+                    fig,
+                    width="stretch",
+                    config={"displayModeBar": True}
+                )
             else:
                 st.info("Not enough timestamp data for a trend chart.")
         else:
             st.info("Timestamp data is not available.")
 
-        st.subheader("Ã°Å¸â€¢â€™ Recent Conversations")
+        st.subheader("Recent Conversations")
         recent = df.head(10)[
             ["id", "timestamp", "transcript", "language", "speaker"]
         ]
@@ -431,15 +497,15 @@ if page == "Ã°Å¸â€œÅ  Dashboard":
         )
 
     st.markdown("---")
-    st.subheader("Ã°Å¸Å¡â‚¬ Data Science Platform")
+    st.subheader("Data Science Platform")
 
     cards = [
-        ("Ã°Å¸ËœÅ  NLP", "Text analysis, keywords and sentiment"),
-        ("Ã°Å¸â€˜Â¥ Segmentation", "RFM customer intelligence"),
-        ("Ã°Å¸Å¡Â¨ Fraud", "Machine-learning risk detection"),
-        ("Ã°Å¸â€œË† Forecasting", "Sales trend and prediction"),
-        ("Ã°Å¸â€Â¬ EDA", "Data quality and statistics"),
-        ("Ã°Å¸Â¤â€“ ML", "Classification and regression")
+        ("NLP", "Text analysis, keywords and sentiment"),
+        ("Segmentation", "RFM customer intelligence"),
+        ("Fraud", "Machine-learning risk detection"),
+        ("Forecasting", "Sales trend and prediction"),
+        ("EDA", "Data quality and statistics"),
+        ("ML", "Classification and regression")
     ]
 
     cols = st.columns(3)
@@ -452,7 +518,7 @@ if page == "Ã°Å¸â€œÅ  Dashboard":
 # SPEECH TO TEXT
 # ============================================================
 
-elif page == "Ã°Å¸Å½â„¢Ã¯Â¸Â Speech-to-Text":
+elif page == "🎙️ Speech-to-Text":
 
     st.header("Speech-to-Text")
     st.write("Record your voice and convert it into conversation intelligence.")
@@ -656,13 +722,13 @@ elif page == "Ã°Å¸Å½â„¢Ã¯Â¸Â Speech-to-Text":
 
 elif "Conversation Intelligence" in page:
 
-    st.header("?? Conversation Intelligence")
+    st.header("🧠 Conversation Intelligence")
     st.write(
         "Analyze saved and new conversations using language detection, "
         "speaker identification and event extraction."
     )
 
-    st.subheader("?? Analyze Saved Conversations")
+    st.subheader("📂 Analyze Saved Conversations")
 
     if df.empty:
         st.info("No saved conversations are available in the database.")
@@ -684,11 +750,11 @@ elif "Conversation Intelligence" in page:
             selected_row.get("transcript", "")
         ).strip()
 
-        with st.expander("?? View Saved Transcript", expanded=True):
+        with st.expander("📄 View Saved Transcript", expanded=True):
             st.write(saved_transcript)
 
         if st.button(
-            "?? Analyze Selected Conversation",
+            "🔍 Analyze Selected Conversation",
             type="primary",
             key="ci_analyze_saved"
         ):
@@ -720,17 +786,17 @@ elif "Conversation Intelligence" in page:
                     st.success("Saved conversation analyzed successfully!")
 
                     col1, col2, col3 = st.columns(3)
-                    col1.metric("?? Language", language)
-                    col2.metric("?? Speaker", speaker)
+                    col1.metric("🌐 Language", language)
+                    col2.metric("🎙️ Speaker", speaker)
                     col3.metric(
-                        "?? Events",
+                        "📌 Events",
                         len(events) if events is not None else 0
                     )
 
-                    st.subheader("?? Transcript")
+                    st.subheader("📝 Transcript")
                     st.write(saved_transcript)
 
-                    st.subheader("?? Extracted Events")
+                    st.subheader("⚡ Extracted Events")
 
                     display_event_cards(events)
 
@@ -738,7 +804,7 @@ elif "Conversation Intelligence" in page:
                     st.error(f"Conversation analysis failed: {exc}")
 
     st.divider()
-    st.subheader("?? Analyze New Text")
+    st.subheader("✨ Analyze New Text")
 
     text_input = st.text_area(
         "Enter conversation text",
@@ -751,7 +817,7 @@ elif "Conversation Intelligence" in page:
     )
 
     if st.button(
-        "?? Analyze New Text",
+        "✨ Analyze New Text",
         key="ci_analyze_manual"
     ):
         if not text_input.strip():
@@ -765,17 +831,17 @@ elif "Conversation Intelligence" in page:
                 st.success("Conversation analyzed successfully!")
 
                 col1, col2, col3 = st.columns(3)
-                col1.metric("?? Language", language)
-                col2.metric("?? Speaker", speaker)
+                col1.metric("🌐 Language", language)
+                col2.metric("🎙️ Speaker", speaker)
                 col3.metric(
-                    "?? Events",
+                    "📌 Events",
                     len(events) if events is not None else 0
                 )
 
-                st.subheader("?? Transcript")
+                st.subheader("📝 Transcript")
                 st.write(text_input)
 
-                st.subheader("?? Extracted Events")
+                st.subheader("⚡ Extracted Events")
 
                 display_event_cards(events)
 
@@ -783,9 +849,9 @@ elif "Conversation Intelligence" in page:
                 st.error(f"Conversation analysis failed: {exc}")
 
 
-elif page == "Ã°Å¸ËœÅ  Sentiment & NLP":
+elif page == "\U0001F60A Sentiment & NLP":
 
-    st.header("Ã°Å¸ËœÅ  Sentiment & NLP")
+    st.header("😊 Sentiment & NLP")
     st.write(
         "Analyze conversation text using NLP, sentiment analysis, "
         "keywords and text statistics."
@@ -797,7 +863,7 @@ elif page == "Ã°Å¸ËœÅ  Sentiment & NLP":
         placeholder="Example: The customer is very happy with our service."
     )
 
-    if st.button("Ã°Å¸Â§Â  Run NLP Analysis", type="primary"):
+    if st.button("🧠 Run NLP Analysis", type="primary"):
 
         if not text.strip():
             st.warning("Please enter text.")
@@ -811,20 +877,20 @@ elif page == "Ã°Å¸ËœÅ  Sentiment & NLP":
             keywords = analyzer.keywords(text, 10)
             summary = advanced.text_summary(text)
 
-            st.subheader("Ã°Å¸ËœÅ  Sentiment")
+            st.subheader("😊 Sentiment")
             c1, c2, c3 = st.columns(3)
             c1.metric("Sentiment", result["sentiment"])
             c2.metric("Polarity", round(result["polarity"], 3))
             c3.metric("Subjectivity", round(result["subjectivity"], 3))
 
-            st.subheader("Ã°Å¸â€œÂ Text Statistics")
+            st.subheader("📊 Text Statistics")
             c1, c2, c3, c4 = st.columns(4)
             c1.metric("Characters", stats["characters"])
             c2.metric("Words", stats["words"])
             c3.metric("Unique Words", stats["unique_words"])
             c4.metric("Sentences", stats["sentences"])
 
-            st.subheader("Ã°Å¸â€â€˜ Top Keywords")
+            st.subheader("🔑 Top Keywords")
             keyword_df = pd.DataFrame(
                 keywords,
                 columns=["Keyword", "Frequency"]
@@ -835,7 +901,7 @@ elif page == "Ã°Å¸ËœÅ  Sentiment & NLP":
                 hide_index=True
             )
 
-            st.subheader("Ã°Å¸Â§Â  Advanced NLP Summary")
+            st.subheader("🧠 Advanced NLP Summary")
             st.json(summary)
 
 
@@ -1055,9 +1121,9 @@ elif page == "Ã°Å¸ËœÅ  Sentiment & NLP":
 # CUSTOMER SEGMENTATION
 # ============================================================
 
-elif page == "Ã°Å¸â€˜Â¥ Customer Segmentation":
+elif page == "\U0001F465 Customer Segmentation":
 
-    st.header("Ã°Å¸â€˜Â¥ Customer Segmentation")
+    st.header("👥 Customer Segmentation")
     st.write(
         "Segment customers using Recency, Frequency and Monetary (RFM) analysis."
     )
@@ -1102,7 +1168,7 @@ elif page == "Ã°Å¸â€˜Â¥ Customer Segmentation":
             )
 
             if st.button(
-                "Ã°Å¸â€˜Â¥ Run Customer Segmentation",
+                "👥 Run Customer Segmentation",
                 type="primary"
             ):
                 try:
@@ -1114,7 +1180,7 @@ elif page == "Ã°Å¸â€˜Â¥ Customer Segmentation":
                         clusters
                     )
 
-                    st.subheader("Ã°Å¸â€œÅ  Customer Segments")
+                    st.subheader("👥 Customer Segments")
                     st.dataframe(
                         rfm,
                         width="stretch",
@@ -1123,7 +1189,7 @@ elif page == "Ã°Å¸â€˜Â¥ Customer Segmentation":
 
                     summary = segmenter.segment_summary(rfm)
 
-                    st.subheader("Ã°Å¸â€œË† Segment Summary")
+                    st.subheader("📊 Segment Summary")
                     st.dataframe(
                         summary,
                         width="stretch",
@@ -1149,9 +1215,9 @@ elif page == "Ã°Å¸â€˜Â¥ Customer Segmentation":
 # FRAUD DETECTION
 # ============================================================
 
-elif page == "Ã°Å¸Å¡Â¨ Fraud Detection":
+elif page == "\U0001F6A8 Fraud Detection":
 
-    st.header("Ã°Å¸Å¡Â¨ Fraud Detection")
+    st.header("🚨 Fraud Detection")
     st.write(
         "Train a Random Forest model to identify potentially fraudulent transactions."
     )
@@ -1177,7 +1243,7 @@ elif page == "Ã°Å¸Å¡Â¨ Fraud Detection":
         )
 
         if st.button(
-            "Ã°Å¸Å¡Â¨ Train Fraud Model",
+            "🚨 Train Fraud Model",
             type="primary"
         ):
             try:
@@ -1190,7 +1256,7 @@ elif page == "Ã°Å¸Å¡Â¨ Fraud Detection":
                 c3.metric("Recall", f"{metrics['recall']:.2%}")
                 c4.metric("F1 Score", f"{metrics['f1']:.2%}")
 
-                st.subheader("Ã°Å¸â€Â Feature Importance")
+                st.subheader("📊 Feature Importance")
                 importance = detector.feature_importance()
                 st.dataframe(
                     importance,
@@ -1216,9 +1282,9 @@ elif page == "Ã°Å¸Å¡Â¨ Fraud Detection":
 # SALES FORECASTING
 # ============================================================
 
-elif page == "Ã°Å¸â€œË† Sales Forecasting":
+elif page == "\U0001F4C8 Sales Forecasting":
 
-    st.header("Ã°Å¸â€œË† Sales Forecasting")
+    st.header("📈 Sales Forecasting")
     st.write(
         "Analyze historical sales trends, moving averages and future sales."
     )
@@ -1258,7 +1324,7 @@ elif page == "Ã°Å¸â€œË† Sales Forecasting":
             )
 
             if st.button(
-                "Ã°Å¸â€œË† Generate Forecast",
+                "📈 Generate Forecast",
                 type="primary"
             ):
                 try:
@@ -1306,19 +1372,19 @@ elif page == "Ã°Å¸â€œË† Sales Forecasting":
                         trend["direction"]
                     )
 
-                    st.subheader("Ã°Å¸â€œÅ  Historical Sales")
+                    st.subheader("📊 Historical Sales")
                     historical_chart = prepared.set_index(date_col)[
                         [sales_col]
                     ]
                     st.line_chart(historical_chart)
 
-                    st.subheader("Ã°Å¸â€œâ€° Moving Average")
+                    st.subheader("📉 Moving Average")
                     moving_chart = moving.set_index(date_col)[
                         [sales_col, "Moving Average"]
                     ]
                     st.line_chart(moving_chart)
 
-                    st.subheader("Ã°Å¸â€Â® Future Sales Forecast")
+                    st.subheader("🔮 Future Sales Forecast")
                     st.dataframe(
                         forecast,
                         width="stretch",
@@ -1348,9 +1414,9 @@ elif page == "Ã°Å¸â€œË† Sales Forecasting":
 # BUSINESS ANALYTICS
 # ============================================================
 
-elif page == "Ã°Å¸â€œÅ  Business Analytics":
+elif page == "\U0001F4BC Business Analytics":
 
-    st.header("Ã°Å¸â€œÅ  Business Analytics")
+    st.header("💼 Business Analytics")
     st.write(
         "Generate KPIs, group analysis, customer analysis and business insights."
     )
@@ -1383,7 +1449,7 @@ elif page == "Ã°Å¸â€œÅ  Business Analytics":
             )
 
             if st.button(
-                "Ã°Å¸â€œÅ  Analyze Business Data",
+                "📊 Analyze Business Data",
                 type="primary"
             ):
                 try:
@@ -1400,14 +1466,14 @@ elif page == "Ã°Å¸â€œÅ  Business Analytics":
                         summary["total_numeric_columns"]
                     )
 
-                    st.subheader("Ã°Å¸â€™Â° KPI Analysis")
+                    st.subheader("KPI Analysis")
                     st.json(kpi)
 
-                    st.subheader("Ã°Å¸â€™Â¡ Business Insights")
+                    st.subheader("Business Insights")
                     for insight in insights:
                         st.info(insight)
 
-                    st.subheader("Ã°Å¸Å¡Â¨ Outlier Analysis")
+                    st.subheader("Outlier Analysis")
                     outliers = business.detect_outliers(value_col)
                     st.write(
                         f"Outliers detected: **{outliers['count']}**"
@@ -1440,9 +1506,9 @@ elif page == "Ã°Å¸â€œÅ  Business Analytics":
 # EDA & STATISTICS
 # ============================================================
 
-elif page == "Ã°Å¸â€Â¬ EDA & Statistics":
+elif page == "📋 EDA & Statistics":
 
-    st.header("Ã°Å¸â€Â¬ EDA & Statistics")
+    st.header("📋 EDA & Statistics")
     st.write(
         "Explore data quality, descriptive statistics, correlations and distributions."
     )
@@ -1467,26 +1533,26 @@ elif page == "Ã°Å¸â€Â¬ EDA & Statistics":
         c3.metric("Missing Values", summary["missing_values"])
         c4.metric("Duplicates", summary["duplicate_rows"])
 
-        st.subheader("Ã°Å¸â€˜â‚¬ Dataset Preview")
+        st.subheader("📋 Dataset Preview")
         st.dataframe(
             data.head(20),
             width="stretch",
             hide_index=True
         )
 
-        st.subheader("Ã°Å¸â€œâ€¹ Data Types")
+        st.subheader("🧾 Data Types")
         st.dataframe(
             eda.data_types().rename("Data Type").to_frame(),
             width="stretch"
         )
 
-        st.subheader("Ã°Å¸â€œÅ  Descriptive Statistics")
+        st.subheader("📊 Descriptive Statistics")
         st.dataframe(
             stats.numeric_summary(),
             width="stretch"
         )
 
-        st.subheader("Ã°Å¸â€â€” Correlation Matrix")
+        st.subheader("🔗 Correlation Matrix")
         correlation = eda.correlation()
         if not correlation.empty:
             st.dataframe(
@@ -1500,7 +1566,7 @@ elif page == "Ã°Å¸â€Â¬ EDA & Statistics":
         categorical_columns = eda.categorical_columns()
 
         if numeric_columns:
-            st.subheader("Ã°Å¸â€œË† Numeric Visualization")
+            st.subheader("📊 Numeric Visualization")
             selected_numeric = st.selectbox(
                 "Select numeric column",
                 numeric_columns,
@@ -1514,7 +1580,7 @@ elif page == "Ã°Å¸â€Â¬ EDA & Statistics":
             st.plotly_chart(fig, width="stretch")
 
         if categorical_columns:
-            st.subheader("Ã°Å¸â€œÅ  Categorical Visualization")
+            st.subheader("📊 Categorical Visualization")
             selected_category = st.selectbox(
                 "Select categorical column",
                 categorical_columns,
@@ -1535,9 +1601,9 @@ elif page == "Ã°Å¸â€Â¬ EDA & Statistics":
 # MACHINE LEARNING
 # ============================================================
 
-elif page == "Ã°Å¸Â¤â€“ Machine Learning":
+elif page == "📊 Machine Learning":
 
-    st.header("Ã°Å¸Â¤â€“ Machine Learning")
+    st.header("📊 Machine Learning")
     st.write(
         "Train classification or regression models on uploaded datasets."
     )
@@ -1587,7 +1653,7 @@ elif page == "Ã°Å¸Â¤â€“ Machine Learning":
             )
 
         if st.button(
-            "Ã°Å¸Â¤â€“ Train Machine Learning Model",
+            "🤖 Train Machine Learning Model",
             type="primary"
         ):
             try:
@@ -1652,9 +1718,9 @@ elif page == "Ã°Å¸Â¤â€“ Machine Learning":
 # KNOWLEDGE GRAPH
 # ============================================================
 
-elif page == "Ã°Å¸â€¢Â¸Ã¯Â¸Â Knowledge Graph":
+elif page == "\U0001F578 Knowledge Graph":
 
-    st.header("Ã°Å¸â€¢Â¸Ã¯Â¸Â Interactive Knowledge Graph")
+    st.header("🕸️ Interactive Knowledge Graph")
     st.write(
         "Explore relationships between conversations, speakers, "
         "languages, events and transcripts."
@@ -1796,8 +1862,8 @@ elif page == "Ã°Å¸â€¢Â¸Ã¯Â¸Â Knowledge Graph":
             )
 
             col1, col2 = st.columns(2)
-            col1.metric("Ã°Å¸â€Âµ Nodes", len(nodes))
-            col2.metric("Ã°Å¸â€â€” Relationships", len(edges))
+            col1.metric("Nodes", len(nodes))
+            col2.metric("Relationships", len(edges))
 
     except ImportError:
         st.error("streamlit-agraph is not installed.")
@@ -1810,9 +1876,9 @@ elif page == "Ã°Å¸â€¢Â¸Ã¯Â¸Â Knowledge Graph":
 # CONVERSATION DATABASE
 # ============================================================
 
-elif page == "Ã°Å¸â€™Â¾ Conversation Database":
+elif page == "\U0001F5C4 Conversation Database":
 
-    st.header("Ã°Å¸â€™Â¾ Conversation Database")
+    st.header("Conversation Database")
 
     if df.empty:
         st.info("No conversations stored.")
@@ -1826,12 +1892,12 @@ elif page == "Ã°Å¸â€™Â¾ Conversation Database":
         )
 
         st.markdown("---")
-        st.subheader("Ã°Å¸â€œÂ¥ Export Database")
+        st.subheader("Export Database")
 
         csv_data = df.to_csv(index=False)
 
         st.download_button(
-            label="Ã¢Â¬â€¡Ã¯Â¸Â Download CSV",
+            label="Download CSV",
             data=csv_data,
             file_name="voxintel_conversations.csv",
             mime="text/csv"
@@ -1842,14 +1908,14 @@ elif page == "Ã°Å¸â€™Â¾ Conversation Database":
 # CONVERSATION ANALYTICS
 # ============================================================
 
-elif page == "Ã°Å¸â€œË† Analytics":
+elif page == "\U0001F4CA Analytics":
 
-    st.header("Ã°Å¸â€œË† Conversation Analytics")
+    st.header("Conversation Analytics")
 
     if df.empty:
         st.info("No conversation data available.")
     else:
-        st.subheader("Ã°Å¸Å’Â Language Analytics")
+        st.subheader("Language Analytics")
 
         language_distribution = (
             df["language"]
@@ -1871,7 +1937,7 @@ elif page == "Ã°Å¸â€œË† Analytics":
             )
 
         st.markdown("---")
-        st.subheader("Ã°Å¸â€˜Â¤ Speaker Analytics")
+        st.subheader("📊 Speaker Analytics")
 
         speaker_distribution = (
             df["speaker"]
@@ -1893,7 +1959,7 @@ elif page == "Ã°Å¸â€œË† Analytics":
             )
 
         st.markdown("---")
-        st.subheader("Ã°Å¸â€œÂ Conversation Length")
+        st.subheader("📏 Conversation Length")
 
         word_counts = [
             len(str(text).split())
@@ -1910,7 +1976,7 @@ elif page == "Ã°Å¸â€œË† Analytics":
         )
 
         st.markdown("---")
-        st.subheader("Ã°Å¸Â§Â  Event Analytics")
+        st.subheader("📅 Event Analytics")
 
         counts = event_counts(df)
 
@@ -1940,12 +2006,12 @@ elif page == "Ã°Å¸â€œË† Analytics":
 st.markdown("---")
 
 st.caption(
-    "VOXINTEL Ã¢â‚¬â€ AI-Powered Multilingual Conversation & "
+    "VOXINTEL - AI-Powered Multilingual Conversation & "
     "Customer Intelligence Platform"
 )
 
 st.caption(
-    "Speech Ã¢â€ â€™ Text Ã¢â€ â€™ Language Ã¢â€ â€™ Speaker Ã¢â€ â€™ Events Ã¢â€ â€™ "
-    "Memory Ã¢â€ â€™ Database Ã¢â€ â€™ NLP Ã¢â€ â€™ Customer Intelligence Ã¢â€ â€™ "
-    "Data Science Ã¢â€ â€™ Business Insights"
+    "Speech > Text > Language > Speaker > Events > "
+    "Memory > Database > NLP > Customer Intelligence > "
+    "Data Science > Business Insights"
 )

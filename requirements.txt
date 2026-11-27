@@ -9,3 +9,4 @@ SpeechRecognition
 audio-recorder-streamlit
 streamlit-agraph
 psycopg[binary]
+streamlit-audiorecorder==0.0.6
